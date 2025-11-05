@@ -116,7 +116,7 @@ public class Main extends Application {
         Scene sc = new Scene(main, 1020, 600);
         primaryStage.setScene(sc);
         primaryStage.setTitle("Burma Dictionary");
-        primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/images/icon.jpg")));
+        primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/images/icon.png")));
         primaryStage.setResizable(false);
         primaryStage.show();
 
