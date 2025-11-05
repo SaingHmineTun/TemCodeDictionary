@@ -52,7 +52,7 @@ public class LocalDatabase {
 
     public static List<Data> getAllData() {
         var list = new ArrayList<Data>();
-        String query = "SELECT * FROM dictionary ORDER BY stripword";
+        String query = "SELECT * FROM dictionary ORDER BY RANDOM();";
         try (Connection con = getConnection()) {
             PreparedStatement pstmt = con.prepareStatement(query);
             var rs = pstmt.executeQuery();

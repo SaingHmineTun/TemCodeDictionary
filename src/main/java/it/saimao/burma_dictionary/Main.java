@@ -41,32 +41,39 @@ public class Main extends Application {
 
     private final Font titleFont = Font.loadFont(getClass().getResourceAsStream("/fonts/title.ttf"), 26);
     private final Font subTitleFont = Font.loadFont(getClass().getResourceAsStream("/fonts/title.ttf"), 20);
-    private final Font footerFont = Font.loadFont(getClass().getResourceAsStream("/fonts/title.ttf"), 12);
+    private final Font phonecticFont = Font.loadFont(getClass().getResourceAsStream("/fonts/phonectic.ttf"), 22);
+    private final Font footerFont = Font.loadFont(getClass().getResourceAsStream("/fonts/title.ttf"), 14);
     private final Font contentFont = Font.loadFont(getClass().getResourceAsStream("/fonts/content.ttf"), 16);
 
     List<Data> dataList;
 
-    @Override
-    public void start(Stage primaryStage) throws Exception {
+    private Parent createBottomPane() {
+        Label lbFooter = new Label("Developed by Sai Mao (TMK)");
+        lbFooter.setFont(footerFont);
+        lbFooter.setTextFill(Color.WHITE);
+        BorderPane.setMargin(lbFooter, new Insets(5, 0, 0, 0));
+        lbFooter.setAlignment(Pos.CENTER);
+        lbFooter.setPrefHeight(50);
+        lbFooter.setPrefWidth(1020);
+        lbFooter.setPadding(new Insets(5));
+        //Create gradient background for footer
+        lbFooter.setBackground(new Background(new BackgroundFill(
+                new LinearGradient(0, 0, 1, 1, true,
+                        javafx.scene.paint.CycleMethod.NO_CYCLE,
+                        new Stop(0, Color.web("#2C5364")),
+                        new Stop(1, Color.web("#0F9BFE"))),
+                new CornerRadii(0, 0, 5, 5, false),
+                Insets.EMPTY)));
+        lbFooter.setEffect(new DropShadow());
+        return lbFooter;
+    }
 
-        LocalDatabase.ensureDatabaseExists();
-        dataList = LocalDatabase.getAllData();
-
-//       File file = new File("data.ser");
-//        ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
-//        out.writeObject(dataList);
-//        out.close();
-
-        BorderPane main = new BorderPane();
-
-        main.setLeft(createLeftPane());
-        main.setRight(createRightPane());
-
+    private Parent createTopPane() {
         Label lbHeader = new Label("Burma Dictionary");
         lbHeader.setFont(titleFont);
         lbHeader.setAlignment(Pos.CENTER);
         lbHeader.setPrefHeight(60);
-        lbHeader.setPrefWidth(800);
+        lbHeader.setPrefWidth(1020);
         BorderPane.setMargin(lbHeader, new Insets(0, 0, 10, 0));
         lbHeader.setPadding(new Insets(5));
         // Create gradient background for header
@@ -79,7 +86,21 @@ public class Main extends Application {
                 Insets.EMPTY)));
         lbHeader.setTextFill(Color.WHITE);
         lbHeader.setEffect(new DropShadow());
-        main.setTop(lbHeader);
+        return lbHeader;
+    }
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+
+        LocalDatabase.ensureDatabaseExists();
+        dataList = LocalDatabase.getAllData();
+
+        BorderPane main = new BorderPane();
+
+        main.setLeft(createLeftPane());
+        main.setRight(createRightPane());
+        main.setBottom(createBottomPane());
+        main.setTop(createTopPane());
 
         main.setPadding(new Insets(5));
         // Create gradient background for main window
@@ -91,26 +112,8 @@ public class Main extends Application {
                 CornerRadii.EMPTY,
                 Insets.EMPTY)));
 
-        Label lbFooter = new Label("Developed by Sai Mao (TMK)");
-        lbFooter.setFont(footerFont);
-        lbFooter.setTextFill(Color.WHITE);
-        BorderPane.setMargin(lbFooter, new Insets(5, 0, 0, 0));
-        lbFooter.setAlignment(Pos.CENTER);
-        lbFooter.setPrefHeight(30);
-        lbFooter.setPrefWidth(800);
-        lbFooter.setPadding(new Insets(5));
-        //Create gradient background for footer
-        lbFooter.setBackground(new Background(new BackgroundFill(
-                new javafx.scene.paint.LinearGradient(0, 0, 1, 1, true,
-                        javafx.scene.paint.CycleMethod.NO_CYCLE,
-                        new javafx.scene.paint.Stop(0, Color.web("#2C5364")),
-                        new javafx.scene.paint.Stop(1, Color.web("#0F9BFE"))),
-                new CornerRadii(0, 0, 5, 5, false),
-                Insets.EMPTY)));
-        lbFooter.setEffect(new DropShadow());
-        main.setBottom(lbFooter);
 
-        Scene sc = new Scene(main, 820, 600);
+        Scene sc = new Scene(main, 1020, 600);
         primaryStage.setScene(sc);
         primaryStage.setTitle("Burma Dictionary");
         primaryStage.getIcons().add(new Image(getClass().getResourceAsStream("/images/icon.jpg")));
@@ -123,12 +126,12 @@ public class Main extends Application {
 
     }
 
-    private Label lbWord, lbState;
+    private TextField lbWord, lbState;
     private TextField tfSearch;
 
     private Node createRightPane() {
         VBox main = new VBox();
-        main.setPrefWidth(400);
+        main.setPrefWidth(500);
         main.setPadding(new Insets(15));
         main.setSpacing(10);
 
@@ -146,9 +149,12 @@ public class Main extends Application {
         HBox hbWord = new HBox();
         hbWord.setAlignment(Pos.CENTER_LEFT);
         hbWord.setSpacing(20);
-        lbWord = new Label();
+        lbWord = new TextField();
+        lbWord.setCursor(Cursor.DEFAULT);
         lbWord.setFont(titleFont);
-        lbWord.setTextFill(Color.web("#2C5364"));
+        lbWord.setEditable(false);
+        lbWord.setStyle("-fx-background-color: transparent; -fx-border-width: 0; -fx-text-fill: #2C5364;");
+
         ImageView ivPronounce = new ImageView();
         ivPronounce.setCursor(Cursor.HAND);
         ivPronounce.setImage(new Image(getClass().getResourceAsStream("/images/speaker.png")));
@@ -172,9 +178,11 @@ public class Main extends Application {
 
         hbWord.getChildren().addAll(lbWord, ivPronounce);
 
-        lbState = new Label("");
-        lbState.setFont(subTitleFont);
-        lbState.setTextFill(Color.web("#0F9BFE"));
+        lbState = new TextField("");
+        lbState.setEditable(false);
+        lbState.setCursor(Cursor.DEFAULT);
+        lbState.setStyle("-fx-background-color: transparent; -fx-border-width: 0; -fx-text-fill: #0F9BFE;");
+        lbState.setFont(phonecticFont);
 
 
         lbDefinition = new Label(); // Use Label instead of WebView
@@ -187,6 +195,7 @@ public class Main extends Application {
         lbDefinition.setPadding(new Insets(10));
 
         lbKeywords = new Label("Keywords");
+        lbKeywords.setPadding(new Insets(0, 0, 0, 10));
         lbKeywords.setFont(subTitleFont);
         lbKeywords.setTextFill(Color.web("#2C5364"));
 
@@ -197,6 +206,7 @@ public class Main extends Application {
         FlowPane.setMargin(lbKeywords, new Insets(20, 0, 0, 0));
 
         lbSynonym = new Label("Synonyms");
+        lbSynonym.setPadding(new Insets(0, 0, 0, 10));
         lbSynonym.setFont(subTitleFont);
         lbSynonym.setTextFill(Color.web("#2C5364"));
 
@@ -228,7 +238,7 @@ public class Main extends Application {
 
     private Node createLeftPane() {
         VBox main = new VBox();
-        main.setPrefWidth(400);
+        main.setPrefWidth(500);
         main.setSpacing(10);
         main.setPadding(new Insets(0, 10, 0, 5));
 
@@ -240,13 +250,14 @@ public class Main extends Application {
                 Color.web("#2C5364", 0.9),
                 new CornerRadii(8),
                 Insets.EMPTY)));
-//Search Label
+        //Search Label
         Label lbSearch = new Label("Search : ");
+        lbSearch.setPrefWidth(80);
         lbSearch.setFont(contentFont);
         lbSearch.setTextFill(Color.WHITE);
         // Search TextField
         tfSearch = new TextField();
-        tfSearch.setPrefWidth(260);
+        tfSearch.setPrefWidth(320);
         tfSearch.setPrefHeight(40);
         tfSearch.setPromptText("Enter word to search...");
         tfSearch.setFont(contentFont);
