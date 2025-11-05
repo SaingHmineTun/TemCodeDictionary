@@ -54,7 +54,7 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>it.saimao.temcodedictionary/it.saimao.burma_dictionary.HelloApplication
+                            <mainClass>it.saimao.burma_dictionary/it.saimao.burma_dictionary.Main
                             </mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
