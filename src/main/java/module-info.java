@@ -1,6 +1,8 @@
-module it.saimao.temcodedictionary {
+module it.saimao.burma_dictionary {
     requires javafx.controls;
     requires org.json;
     requires java.sql;
-    exports it.saimao.temcodedictionary;
+    requires javafx.web;
+    requires freetts;
+    exports it.saimao.burma_dictionary;
 }
