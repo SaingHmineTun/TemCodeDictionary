@@ -3,6 +3,7 @@ package it.saimao.burma_dictionary;
 import com.sun.speech.freetts.Voice;
 import com.sun.speech.freetts.VoiceManager;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -19,6 +20,7 @@ import javafx.scene.paint.*;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import org.fxmisc.richtext.InlineCssTextArea;
 
 import java.util.List;
 
@@ -30,7 +32,7 @@ public class Main extends Application {
     private Label lbSynonym;
     private FlowPane fKeywords;
     private Label lbKeywords;
-    private Label lbDefinition; // Replace WebView with Label
+    private InlineCssTextArea htmlDisplay; // Keep using RichTextFX
 
     public static void main(String[] args) {
 
@@ -52,7 +54,7 @@ public class Main extends Application {
         LocalDatabase.ensureDatabaseExists();
         dataList = LocalDatabase.getAllData();
 
-//       File file = new File("data.ser");
+//File file = new File("data.ser");
 //        ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
 //        out.writeObject(dataList);
 //        out.close();
@@ -99,7 +101,7 @@ public class Main extends Application {
         lbFooter.setPrefHeight(30);
         lbFooter.setPrefWidth(800);
         lbFooter.setPadding(new Insets(5));
-        //Create gradient background for footer
+//Create gradient background forfooter
         lbFooter.setBackground(new Background(new BackgroundFill(
                 new javafx.scene.paint.LinearGradient(0, 0, 1, 1, true,
                         javafx.scene.paint.CycleMethod.NO_CYCLE,
@@ -132,7 +134,7 @@ public class Main extends Application {
         main.setPadding(new Insets(15));
         main.setSpacing(10);
 
-        // Add rounded corners and border with gradient
+        // Add rounded corners andborder with gradient
         main.setBorder(new Border(new BorderStroke(
                 Color.web("#2C5364"),
                 BorderStrokeStyle.SOLID,
@@ -177,14 +179,13 @@ public class Main extends Application {
         lbState.setTextFill(Color.web("#0F9BFE"));
 
 
-        lbDefinition = new Label(); // Use Label instead of WebView
-        lbDefinition.setWrapText(true);
-        lbDefinition.setFont(contentFont);
-        lbDefinition.setTextFill(Color.web("#2C5364"));
-        lbDefinition.setPrefHeight(200);
-        lbDefinition.setMinHeight(100);
-        lbDefinition.setMaxWidth(380);
-        lbDefinition.setPadding(new Insets(10));
+        htmlDisplay = new org.fxmisc.richtext.InlineCssTextArea(); // Use RichTextFX component
+        htmlDisplay.setWrapText(true);
+        htmlDisplay.setEditable(false);
+        htmlDisplay.setStyle("-fx-background-color: transparent;");
+        htmlDisplay.setPrefHeight(200);
+        htmlDisplay.setMinHeight(100);
+        htmlDisplay.setMaxWidth(380);
 
         lbKeywords = new Label("Keywords");
         lbKeywords.setFont(subTitleFont);
@@ -206,7 +207,7 @@ public class Main extends Application {
         fSynonyms.setVgap(8);
         FlowPane.setMargin(fSynonyms, new Insets(20, 0, 0, 0));
 
-        VBox vbScrollable = new VBox(lbDefinition, lbKeywords, fKeywords, lbSynonym, fSynonyms);
+        VBox vbScrollable = new VBox(htmlDisplay, lbKeywords, fKeywords, lbSynonym, fSynonyms);
         // Make sure the VBox grows to take available space
         VBox.setVgrow(vbScrollable, Priority.ALWAYS);
 
@@ -220,8 +221,7 @@ public class Main extends Application {
         VBox.setVgrow(scrollPane, Priority.ALWAYS);
 
         main.getChildren().addAll(hbWord, lbState, scrollPane);
-        // Make main VBox fill available space
-        VBox.setVgrow(main, Priority.ALWAYS);
+        // Make main VBox fill available spaceVBox.setVgrow(main, Priority.ALWAYS);
 
         return main;
     }
@@ -240,7 +240,7 @@ public class Main extends Application {
                 Color.web("#2C5364", 0.9),
                 new CornerRadii(8),
                 Insets.EMPTY)));
-//Search Label
+        //SearchLabel
         Label lbSearch = new Label("Search : ");
         lbSearch.setFont(contentFont);
         lbSearch.setTextFill(Color.WHITE);
@@ -406,41 +406,22 @@ public class Main extends Application {
     private void selectWord(Data newValue) {
         lbWord.setText(newValue.stripWord());
         lbState.setText(newValue.title());
-        // Convert HTML to plain text for Label
-        String plainText = convertHtmlToPlainText(newValue.definition());
-        lbDefinition.setText(plainText);
+
+        // Display HTML content in RichTextFX component
+        htmlDisplay.replaceText(0, htmlDisplay.getLength(), newValue.definition());
 
         // Calculate and set the preferred height based on text content
-        lbDefinition.setPrefHeight(Label.USE_COMPUTED_SIZE);
-        lbDefinition.autosize();
+        Platform.runLater(() -> {
+            try {
+                htmlDisplay.setPrefHeight(Math.max(100, htmlDisplay.getTotalHeightEstimate()));
+            } catch (Exception e) {
+                // Fallback if height calculation fails
+                htmlDisplay.setPrefHeight(200);
+            }
+        });
 
         addKeywords(newValue);
         addSynonyms(newValue);
-    }
-
-    /**
-     * Convert basic HTML to plain text
-     *
-     * @param htmlText HTML text to convert
-     * @return Plain text
-     */
-    private String convertHtmlToPlainText(String htmlText) {
-        if (htmlText == null || htmlText.isEmpty()) {
-            return "";
-        }
-
-        return htmlText
-                .replaceAll("<br\\s*/?>", "\n")
-                .replaceAll("<p\\s*/?>", "\n")
-                .replaceAll("</p>", "\n")
-                .replaceAll("<[^>]*>", "") // Remove all other HTML tags
-                .replace("&nbsp;", " ")
-                .replace("&amp;", "&")
-                .replace("&lt;", "<")
-                .replace("&gt;", ">")
-                .replace("&quot;", "\"")
-                .replace("&#39;", "'")
-                .trim();
     }
 
     private Node createEmptyResultPlaceholder() {
